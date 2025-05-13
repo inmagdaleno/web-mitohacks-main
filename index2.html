@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todos los productos</title>
+    <link rel="stylesheet" href="CSS/styles2.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Raleway:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+    <!-- libreria de css boostrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+  
+    <!-- link iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+    <!-- barra de navegación colapsable -->
+    <nav class="navbar navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
+        <div class="container-fluid">
+            
+            <button class="navbar-toggler d-lg-none order-1" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <a class="navbar-brand ps-4 order-2 order-lg-1 mx-auto mx-lg-0" href="#">
+                <img src="imagenes/logo-mithohacks-blanco-p.png" alt="logo" width="200" height="24">
+            </a>
+            
+            <!-- menú colapsable -->
+            <div class="collapse navbar-collapse order-4 order-lg-2" id="navbarNav">
+                <div class="mx-auto p-2" style="width: 500px;">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="#">Inicio</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Tienda</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Quienes somos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Blog</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Contacto</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="d-flex align-items-center order-3 ms-auto">
+                <div class="cart-icon-container me-2 me-lg-4" id="navbar-cart-container">
+                    <a href="#" id="navbar-cart">
+                        <i class="fas fa-shopping-cart" style="font-size: 20px; color:aliceblue"></i>
+                    </a>
+                    <span id="navbar-contador" class="cart-counter" style="display: none;">0</span>
+                </div>
+                <a href="#" class="me-2 me-lg-4">
+                    <i class="fas fa-star" style="font-size: 20px; color:aliceblue"></i>
+                </a>
+                <a href="#" class="me-2 me-lg-4">
+                    <i class="fas fa-question-circle" style="font-size: 20px; color:aliceblue"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+    <!-- fin barra de navegación-->
+     
+    <section class="main">
+        <div class="container">
+            <h1 class="title">Todos los productos</h1>
+            <div class="products" id="products">
+                <!-- Los productos se cargarán dinámicamente desde JavaScript -->
+            </div>
+        </div>
+        
+        <button id="toggle-cart" class="cart-icon-container" style="display: none;">
+            <i class="fas fa-shopping-cart"></i>
+            <span id="flotante-contador" class="cart-counter" style="display: none;">0</span>
+        </button>
+        
+        <div id="cart">
+            <h2>Carrito</h2>
+            <div id="cart-items">
+                <!-- Los items del carrito se cargarán dinámicamente desde JavaScript -->
+            </div>
+            <div id="cart-total">Total: 0.00€</div>
+            <button id="comprar">Finalizar Compra</button>
+        </div>
+    </section>  
+    
+    <script src="javascript.js/js.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
+    
+</body>
+</html>
