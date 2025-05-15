@@ -45,8 +45,11 @@ function filterProducts() {
     
     productsContainer.innerHTML = filteredProducts.map((product) => 
         `
-        <div class="product-card">
+        <div class="product-card" data-product-id="${product.id}">
             <div class="product-image-container">
+                <button class="favorite-button" onclick="toggleFavorite(event, ${product.id})">
+                    <i class="fas fa-heart ${product.favorite ? 'active' : ''}"></i>
+                </button>
                 <img src="${product.image}" alt="${product.name}">
             </div>
             <h3>${product.name}</h3>
@@ -64,220 +67,38 @@ function filterProducts() {
         </div>
         `
     ).join('');
-}
-
-// Mostrar productos en la página
-function displayProducts() {
-    filterProducts();
-}
-
-// Añadir producto al carrito
-function addToCart(productId) {
-    const producto = products.find(p => p.id === productId);
-    const cantidad = parseInt(document.getElementById(`cantidad-${productId}`).value);
-
-    // Comprobar si el producto existe en el carrito
-    const productoExiste = lineasCarrito.findIndex(item => item.id === productId);
-
-    if (productoExiste === -1) {
-        // El producto no está en el carrito
-        lineasCarrito.push({...producto, cantidad});
-    } else {
-        // El producto ya está en el carrito
-        lineasCarrito[productoExiste].cantidad += cantidad;
-    }
-
-    console.log(lineasCarrito);
-    actualizarCarrito();
-    guardarEnLocalStorage();
-}
-
-// Actualizar vista del carrito
-function actualizarCarrito() {
-    document.getElementById("cart-items").innerHTML = lineasCarrito.map((linea, index) =>
-        `
-        <div class="cart-item">
-            <span>${linea.name} - ${linea.price.toFixed(2)}€</span>
-            <button onclick="actualizarCantidad(${index}, ${linea.cantidad - 1})">-</button>
-            <span class="cart-cantidad">${linea.cantidad}</span>
-            <button class="mas" onclick="actualizarCantidad(${index}, ${linea.cantidad + 1})">+</button>
-            <button onclick="removeFromCart(${index})">Eliminar</button>
-        </div>
-        `
-    ).join('');
     
-    // Calcular el total de la compra
-    const totalCarrito = lineasCarrito.reduce((suma, item) => suma + (item.price * item.cantidad), 0);
-    document.getElementById("cart-total").textContent = `Total: ${totalCarrito.toFixed(2)} €`;
-
-    // Mostrar número de productos comprados
-    const numComprados = lineasCarrito.reduce((suma, item) => suma + item.cantidad, 0);
-
-    // Actualizar contador del carrito
-    actualizarContadoresCarrito(numComprados);
-    
-    // Mostrar u ocultar el botón de comprar
-    if (numComprados === 0) {
-        document.getElementById("comprar").style.display = "none";
-    } else {
-        document.getElementById("comprar").style.display = "block";
-    }
+    // Add click events to images
+    document.querySelectorAll('.product-image-container img').forEach(img => {
+        img.style.cursor = 'pointer';
+        img.addEventListener('click', function() {
+            const productCard = this.closest('.product-card');
+            const productId = parseInt(productCard.dataset.productId);
+            modalController.openModal(productId);
+        });
+    });
 }
 
-// Función para actualizar ambos contadores del carrito
-function actualizarContadoresCarrito(numComprados) {
-    const navbarContador = document.getElementById("navbar-contador");
-    const flotanteContador = document.getElementById("flotante-contador");
-    
-    if (numComprados === 0) {
-        navbarContador.style.display = "none";
-        flotanteContador.style.display = "none";
-    } else {
-        navbarContador.textContent = numComprados;
-        navbarContador.style.display = "block";
+// Add this new function to handle favorites
+function toggleFavorite(event, productId) {
+    event.stopPropagation(); // Prevent modal from opening when clicking favorite button
+    const product = products.find(p => p.id === productId);
+    if (product) {
+        product.favorite = !product.favorite;
+        // Update the icon in both card and modal if it's open
+        const icons = document.querySelectorAll(`[data-product-id="${productId}"] .fa-heart`);
+        icons.forEach(icon => icon.classList.toggle('active'));
         
-        flotanteContador.textContent = numComprados;
-        flotanteContador.style.display = "block";
+        // Update modal favorite icon if modal is open
+        const modalFavoriteIcon = document.querySelector('#modal-favorite-icon');
+        if (modalFavoriteIcon && parseInt(document.querySelector('.modal-content').dataset.productId) === productId) {
+            modalFavoriteIcon.classList.toggle('active');
+        }
     }
 }
 
-// Actualizar cantidad de un producto
-function actualizarCantidad(indice, cantidad) {
-    // Si cantidad es menor que 1 borro la línea
-    if (cantidad < 1) {
-        removeFromCart(indice);
-    } else {
-        // Actualizo
-        lineasCarrito[indice].cantidad = cantidad;
-        actualizarCarrito();
-        guardarEnLocalStorage();
-    }
-}
-
-// Eliminar producto del carrito
-function removeFromCart(indice) {
-    // Eliminar del array lineasCarrito el elemento con el indice indicado
-    lineasCarrito.splice(indice, 1);
-    actualizarCarrito();
-    guardarEnLocalStorage();
-}
-
-// Función para mostrar el carrito
-function mostrarCarrito() {
-    document.getElementById("cart").classList.add("open");
-    document.getElementById("navbar-cart-container").style.display = "none";
-    document.getElementById("toggle-cart").style.display = "flex";
-}
-
-// Función para ocultar el carrito
-function ocultarCarrito() {
-    document.getElementById("cart").classList.remove("open");
-    document.getElementById("navbar-cart-container").style.display = "block";
-    document.getElementById("toggle-cart").style.display = "none";
-}
-
-// Mostrar/ocultar carrito con el botón flotante
-document.getElementById("toggle-cart").addEventListener("click", () => {
-    const cart = document.getElementById("cart");
-    if (cart.classList.contains("open")) {
-        ocultarCarrito();
-    } else {
-        mostrarCarrito();
-    }
-});
-
-// Mostrar carrito al hacer clic en el icono de la barra de navegación
-document.getElementById("navbar-cart").addEventListener("click", (e) => {
-    e.preventDefault();
-    mostrarCarrito();
-});
-
-// Cerrar carrito cuando se hace clic fuera
-document.addEventListener("click", (e) => {
-    const cart = document.getElementById("cart");
-    const toggleCart = document.getElementById("toggle-cart");
-    const navbarCart = document.getElementById("navbar-cart");
-    
-    // Si el carrito está abierto y el clic no fue en el carrito ni en los botones
-    if (cart.classList.contains("open") && 
-        !cart.contains(e.target) && 
-        e.target !== toggleCart && 
-        !toggleCart.contains(e.target) &&
-        e.target !== navbarCart && 
-        !navbarCart.contains(e.target)) {
-        ocultarCarrito();
-    }
-});
-
-// Botón comprar
-document.getElementById("comprar").addEventListener("click", () => {
-    const totalCompra = lineasCarrito.reduce((suma, item) => suma + item.price * item.cantidad, 0);
-    alert(`Compra realizada por: ${totalCompra.toFixed(2)} €`);
-    // Vaciar carrito después de la compra
-    lineasCarrito = [];
-    actualizarCarrito();
-    guardarEnLocalStorage();
-    ocultarCarrito();
-});
-
-// Guardar carrito en localStorage
-function guardarEnLocalStorage() {
-    localStorage.setItem("carritoGuardado", JSON.stringify(lineasCarrito));
-}
-
-// Recuperar carrito del localStorage
-function leerDelLocalStorage() {
-    // Comprobar si hay un carrito guardado en el navegador en el localStorage
-    if (localStorage.getItem("carritoGuardado") !== null) {
-        const datos = localStorage.getItem("carritoGuardado");
-        lineasCarrito = JSON.parse(datos);
-        actualizarCarrito();
-    }
-}
-
-
-// Inicializar la página
-document.addEventListener("DOMContentLoaded", function() {
-    leerDelLocalStorage();
-    
-    // Cargar las categorías en el selector
-    categorySelect.innerHTML = "";
-    
-    // Primero añadir la opción "Todos los productos"
-    const todosOption = document.createElement("option");
-    todosOption.value = "todos";
-    todosOption.textContent = categoryNames["todos"];
-    categorySelect.appendChild(todosOption);
-    
-    // Obtener categorías del array de productos
-    const uniqueCategories = [...new Set(products.map(product => product.category))];
-    
-    // Añadir cada categoría al selector con su nombre de visualización
-    uniqueCategories.forEach(category => {
-        const option = document.createElement("option");
-        option.value = category;
-        option.textContent = categoryNames[category] || category; 
-        categorySelect.appendChild(option);
-    });
-    
-    // Establecer "todos" como valor predeterminado
-    categorySelect.value = "todos";
-    
-    // Añadir event listener para el filtro de categorías
-    categorySelect.addEventListener("change", function() {
-        currentCategory = this.value;
-        filterProducts();
-    });
-    
-    displayProducts();
-    
-    // Asegurarse de que el botón flotante esté oculto al inicio
-    document.getElementById("toggle-cart").style.display = "none";
-});
-
-// Función para crear y configurar el modal
+// Modify the setupProductModal function to include the favorite button
 function setupProductModal() {
-    // Crear estructura del modal
     const modalHTML = `
         <div id="product-modal" class="modal">
             <div class="modal-content">
@@ -293,15 +114,21 @@ function setupProductModal() {
                     <div class="modal-details">
                         <p id="modal-description"></p>
                         <p id="modal-price" class="modal-price"></p>
-                        <div class="modal-qty">
-                            <label for="modal-quantity">Cantidad:</label>
-                            <select id="modal-quantity">
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
-                            </select>
+                        <div class="modal-actions">
+                            <div class="modal-qty">
+                                <label for="modal-quantity">Cantidad:</label>
+                                <select id="modal-quantity">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                </select>
+                            </div>
+                            <div class="modal-favorite" onclick="toggleFavorite(event, null)">
+                                <i id="modal-favorite-icon" class="fas fa-heart"></i>
+                                <label>Agregar a favoritos</label>
+                            </div>
                         </div>
                         <button id="modal-add-to-cart" class="modal-add-button">Añadir al carrito</button>
                     </div>
@@ -310,19 +137,21 @@ function setupProductModal() {
         </div>
     `;
     
-    // Insertar el modal en el DOM
+    // Insert the modal in the DOM
     document.body.insertAdjacentHTML('beforeend', modalHTML);
     
     let currentProductId = null;
     
-    // Función para abrir el modal con los datos del producto
     function openModal(productId) {
         const product = products.find(p => p.id === productId);
         if (!product) return;
         
         currentProductId = productId;
         
-        // Establecer los valores del producto en el modal
+        // Update modal content
+        const modalContent = document.querySelector('.modal-content');
+        modalContent.dataset.productId = productId;
+        
         document.getElementById("modal-title").textContent = product.name;
         document.getElementById("modal-category").textContent = getCategoryDisplayName(product.category);
         document.getElementById("modal-image").src = product.image;
@@ -331,21 +160,23 @@ function setupProductModal() {
         document.getElementById("modal-price").textContent = `Precio: ${product.price.toFixed(2)}€`;
         document.getElementById("modal-quantity").value = "1";
         
-        // Mostrar el modal
+        // Update favorite icon state
+        const favoriteIcon = document.getElementById("modal-favorite-icon");
+        favoriteIcon.classList.toggle('active', product.favorite);
+        
+        // Update click handler for favorite button
+        document.querySelector('.modal-favorite').onclick = (e) => toggleFavorite(e, productId);
+        
+        // Show modal
         document.getElementById("product-modal").style.display = "flex";
     }
     
-    // Función para obtener el nombre de visualización de la categoría
-    function getCategoryDisplayName(categoryKey) {
-        return categoryNames[categoryKey] || categoryKey;
-    }
-    
-    // Añadir evento para cerrar el modal con el botón X
+    // Add event to close modal with X button
     document.querySelector(".close-modal").addEventListener("click", () => {
         document.getElementById("product-modal").style.display = "none";
     });
     
-    // Cerrar el modal al hacer clic fuera del contenido
+    // Close modal when clicking outside
     window.addEventListener("click", function(event) {
         const modal = document.getElementById("product-modal");
         if (event.target === modal) {
@@ -353,7 +184,7 @@ function setupProductModal() {
         }
     });
     
-    // Añadir evento para el botón "Añadir al carrito" dentro del modal
+    // Add event for "Add to cart" button inside modal
     document.getElementById("modal-add-to-cart").addEventListener("click", function() {
         if (currentProductId) {
             const cantidad = parseInt(document.getElementById("modal-quantity").value);
@@ -362,18 +193,14 @@ function setupProductModal() {
         }
     });
     
-    // Función para añadir al carrito desde el modal
     function addToCartFromModal(productId, cantidad) {
         const producto = products.find(p => p.id === productId);
         
-        // Comprobar si el producto existe en el carrito
         const productoExiste = lineasCarrito.findIndex(item => item.id === productId);
         
         if (productoExiste === -1) {
-            // El producto no está en el carrito
             lineasCarrito.push({...producto, cantidad});
         } else {
-            // El producto ya está en el carrito
             lineasCarrito[productoExiste].cantidad += cantidad;
         }
         
@@ -381,84 +208,29 @@ function setupProductModal() {
         guardarEnLocalStorage();
     }
     
+    function getCategoryDisplayName(categoryKey) {
+        return categoryNames[categoryKey] || categoryKey;
+    }
+    
     return { openModal };
 }
 
-// Modificar la función displayProducts para añadir eventos de clic a las imágenes
-function displayProducts() {
-    filterProducts();
-    
-    // Añadir eventos de clic a las imágenes de productos después de que se hayan cargado
-    document.querySelectorAll('.product-image-container img').forEach(img => {
-        img.style.cursor = 'pointer';
-        img.addEventListener('click', function() {
-            const productCard = this.closest('.product-card');
-            const productId = parseInt(productCard.dataset.productId);
-            modalController.openModal(productId);
-        });
-    });
-}
-
-// Modificar la función filterProducts para incluir el ID del producto como atributo data
-function filterProducts() {
-    const filteredProducts = currentCategory === "todos" 
-        ? products 
-        : products.filter(product => product.category.toLowerCase() === currentCategory.toLowerCase());
-    
-    productsContainer.innerHTML = filteredProducts.map((product) => 
-        `
-        <div class="product-card" data-product-id="${product.id}">
-            <div class="product-image-container">
-                <img src="${product.image}" alt="${product.name}">
-            </div>
-            <h3>${product.name}</h3>
-            <div class="product-cantidad">
-                <p>Precio: ${product.price.toFixed(2)}€</p>
-                <select id="cantidad-${product.id}">
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                </select>
-            </div>
-            <button onclick="addToCart(${product.id})">Añadir al carrito</button>
-        </div>
-        `
-    ).join('');
-    
-    // Añadir eventos de clic a las imágenes después de cargarlas
-    document.querySelectorAll('.product-image-container img').forEach(img => {
-        img.style.cursor = 'pointer';
-        img.addEventListener('click', function() {
-            const productCard = this.closest('.product-card');
-            const productId = parseInt(productCard.dataset.productId);
-            modalController.openModal(productId);
-        });
-    });
-}
-
-// Inicializar el modal y obtener el controlador cuando se cargue el DOM
+// Initialize modal controller and setup event listeners
 let modalController;
 document.addEventListener("DOMContentLoaded", function() {
     leerDelLocalStorage();
     
-    // Inicializar el modal
     modalController = setupProductModal();
     
-    // Cargar las categorías en el selector
     categorySelect.innerHTML = "";
     
-    // Primero añadir la opción "Todos los productos"
     const todosOption = document.createElement("option");
     todosOption.value = "todos";
     todosOption.textContent = categoryNames["todos"];
     categorySelect.appendChild(todosOption);
     
-    // Obtener categorías únicas del array de productos
     const uniqueCategories = [...new Set(products.map(product => product.category))];
     
-    // Añadir cada categoría al selector con su nombre de visualización
     uniqueCategories.forEach(category => {
         const option = document.createElement("option");
         option.value = category;
@@ -466,10 +238,8 @@ document.addEventListener("DOMContentLoaded", function() {
         categorySelect.appendChild(option);
     });
     
-    // Establecer "todos" como valor predeterminado
     categorySelect.value = "todos";
     
-    // Añadir event listener para el filtro de categorías
     categorySelect.addEventListener("change", function() {
         currentCategory = this.value;
         filterProducts();
@@ -477,6 +247,5 @@ document.addEventListener("DOMContentLoaded", function() {
     
     displayProducts();
     
-    // Asegurarse de que el botón flotante esté oculto al inicio
     document.getElementById("toggle-cart").style.display = "none";
 });
