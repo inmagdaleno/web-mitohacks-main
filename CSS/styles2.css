@@ -8,25 +8,47 @@
 
 /* Estilo para iconos con tamaños y separaciones responsivas */
 .icon-nav {
-    font-size: 26px;
+    font-size: 21px;
     color: aliceblue;
 }
 
+.navbar-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+
+}
+
+/* Alineación horizontal para versión móvil */
+@media (max-width: 991.98px) {
+    .navbar .container-fluid {
+        display: flex;
+        align-items: center;
+    }
+    
+    .navbar-brand, .navbar-toggler, .d-flex.align-items-center {
+        margin-top: auto;
+        margin-bottom: auto;
+    }
+}
 /* Estilos para dispositivos móviles */
 @media (max-width: 991.98px) {
     .icon-nav {
-        font-size: 20px; /* Tamaño reducido en móviles */
+        font-size: 18px; /* Tamaño reducido en móviles */
     }
     
     .cart-icon-container, .me-2 {
-        padding-right: 8px !important;  /* Separación en móviles */
+        padding-right: 6px;
+        padding-top: 4px;
     }
 }
 
 /* Estilos para escritorio */
 @media (min-width: 992px) {
     .me-lg-3 {
-        padding-right: 20px !important; /* Separación en escritorio */
+        padding-right: 28px !important; /* Separación en escritorio */
+        justify-content: center;
     }
 }
 
@@ -34,8 +56,7 @@
     background-color: aliceblue;
     margin: -30px;
     padding: 0;
-    margin-bottom: ;
-    padding-bottom: 60px;
+    padding-bottom: 80px;
 }
 
 .container {
@@ -59,10 +80,11 @@
     margin-bottom: 16px;
     color: #333;
     font-family: manrope;
-    font-size: 28px;
+    font-size: 32px;
     font-weight: 700;
 }
 .subtitle {
+    font-size: 19px;
     text-align: center;
     margin-bottom: 20px;
     color: #333;
@@ -282,8 +304,6 @@
     padding-right: 20px;
 }
 
-
-
 .cart-cantidad {
     display: flex;
     align-items: center;
@@ -440,7 +460,7 @@
 
 .modal-image-container img {
     max-width: 100%;
-    max-height: 400px;
+    max-height: 300px;
     object-fit: contain;
     border-radius: 12px;
 }
@@ -451,17 +471,16 @@
 }
 
 .modal-details p {
-    line-height: 26px;
+    line-height: 24px;
     font-size: 14px;
     color: #555;
     margin-bottom: 20px;
 }
 
 .modal-price {
-    font-size: 32px;
+    font-size: 24px;
     font-weight: 800;
     color: #242424;
-
 }
 
 .modal-qty {
